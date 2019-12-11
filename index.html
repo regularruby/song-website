@@ -1,4 +1,4 @@
-<html lang="en">
+<html lang="en" style="background-color: black">
 
 <head>
     <meta charset="utf-8">
@@ -6,20 +6,20 @@
     <title>music</title>
     <meta name="description" content="music">
     <meta name="author" content="SitePoint">
+    <link rel="stylesheet" href="theme.css">
 
 </head>
 
-<body>
-    <h3>
-        <div id="ip"></div>
-        <div id="ping"></div>
-        <div id="host"></div>
-    </h3>
-    <audio controls preload="auto" width="300">
-        <source src="song.ogg" type='audio/ogg'>
+<body style="color:white">
+    <table class="console">
+        <rt>
+            <td id="ip" width="10%"></td>
+            <td id="ping" style="padding-left: 10px"></td>
+        </rt>
+    </table>
+    <audio controls preload="auto">
         <source src="song.mp3" type="audio/mpeg">
-        <a href="song.ogg">test.ogg</a>
-        <a href="song.mp3">test.mp3</a>
+        Your browser does not support the audio element.
     </audio>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -32,7 +32,7 @@
             var pingAvg;
 
             socket.on('link', address => {
-                document.getElementById("ip").innerHTML = "local ip address:\t" + address;
+                document.getElementById("ip").innerHTML = "ip address:\t" + address;
                 console.log("link");
                 socket.emit("fully linked");
             })

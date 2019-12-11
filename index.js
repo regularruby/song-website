@@ -5,17 +5,16 @@ const app = express();
 const server = require('http').createServer(app)
 const io = require('socket.io').listen(server)
 
+let users = [];
 
-
-app.use(express.static('public'))
-
-
+app.use(express.static(__dirname))
 
 server.listen(process.env.PORT || 81);
 console.log('server running...')
 
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html')
+    res.sendFile(__dirname + '/theme.css')
 })
 
 io.sockets.on('connection', socket => {
@@ -26,15 +25,26 @@ io.sockets.on('connection', socket => {
 
     socket.on('disconnect', () => {
         console.log(address.red + "\tlink lost".yellow)
+        for(i=0;i<users.length;i++){
+            if(users[i].addr === address){
+                console.log(users.splice(i, 1)[0]);
+            }
+        }
+        console.log(users)
     })
 
     socket.on('fully linked', () => {
         pingTest(socket);
         console.log(address.green + "\tfully linked".yellow)
+        let obj = {}
+        obj.addr = address
+        obj.ping = 0
+        users.push(obj)
+        console.log(users)
     })
 
-    socket.on('avrage ping', (avgPing, numPing) => {
-
+    socket.on('avrage ping', (avgPing) => {
+        modify(address).ping = avgPing
     })
 
 })
@@ -42,5 +52,13 @@ io.sockets.on('connection', socket => {
 function pingTest(socket) {
     setInterval(() => {
         socket.emit("pingTime", Date.now())
-    }, 10);
+    }, 100);
+}
+
+function modify(address){
+    for(i=0;i<users.length;i++){
+        if(users[i].addr === address){
+            return users[i];
+        }
+    }
 }
