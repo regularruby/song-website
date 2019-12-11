@@ -1,0 +1,62 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>music</title>
+    <meta name="description" content="music">
+    <meta name="author" content="SitePoint">
+
+</head>
+
+<body>
+    <h3>
+        <div id="ip"></div>
+        <div id="ping"></div>
+        <div id="host"></div>
+    </h3>
+    <audio controls preload="auto" width="300">
+        <source src="song.ogg" type='audio/ogg'>
+        <source src="song.mp3" type="audio/mpeg">
+        <a href="song.ogg">test.ogg</a>
+        <a href="song.mp3">test.mp3</a>
+    </audio>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+        $(function () {
+            var socket = io();
+            var ping;
+            var pingStorage = [];
+            var pingAvg;
+
+            socket.on('link', address => {
+                document.getElementById("ip").innerHTML = "local ip address:\t" + address;
+                console.log("link");
+                socket.emit("fully linked");
+            })
+
+            socket.on('pingTime', time => {
+                ping = Date.now() - time;
+                pingStorage.push(ping);
+
+                let avg = 0;
+                for (i = 0; i < pingStorage.length; i++) {
+                    avg += pingStorage[i];
+                }
+                pingAvg = Math.round(10 * (avg / pingStorage.length)) / 10000;
+
+                if (pingStorage.length > 1000) {
+                    pingStorage = [pingAvg]
+                }
+
+                document.getElementById("ping").innerHTML = "ping:\t" + pingAvg;
+                socket.emit("avrage ping", pingAvg);
+            })
+
+        });
+    </script>
+</body>
+
+</html>
