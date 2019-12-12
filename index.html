@@ -1,4 +1,4 @@
-<html lang="en" style="background-color: black">
+<html lang="en">
 
 <head>
     <meta charset="utf-8">
@@ -10,11 +10,11 @@
 
 </head>
 
-<body style="color:white">
+<body >
     <table width="100%">
         <tr>
-            <td id="ip" width="12.8%"></td>
-            <td id="ping" style="padding-left: 10px"></td>
+            <td id="ip" width="10%"></td>
+            <td id="ping" width="10%"></td>
         </tr>
     </table>
     <table id="data" width="100%"></table>
@@ -28,44 +28,44 @@
     <script>
         $(function () {
             var socket = io();
-            var ping;
-            var pingStorage = [];
-            var pingAvg;
+            var addr;
 
-            socket.on('link', address => {
-                document.getElementById("ip").innerHTML = "ip address:\t" + address;
-                console.log("link");
-                socket.emit("fully linked");
+            socket.on('handshake', address => {
+                console.log("handshake-success");
+                socket.emit("handshake-success");
+                addr = address;
             })
 
-            socket.on('pingTime', time => {
-                ping = Date.now() - time;
-                pingStorage.push(ping);
-
-                let avg = 0;
-                for (i = 0; i < pingStorage.length; i++) {
-                    avg += pingStorage[i];
-                }
-                pingAvg = Math.round(10 * (avg / pingStorage.length)) / 10000;
-
-                if (pingStorage.length > 1000) {
-                    pingStorage = [pingAvg]
-                }
-
-                document.getElementById("ping").innerHTML = "ping:\t" + pingAvg;
-                socket.emit("avrage ping", pingAvg);
-            })
+            socket.on('pingTest', time => {
+                socket.emit("pingRebound",time);
+            });
 
             socket.on('data', users => {
-                let str = "<tr><td>IP Address:</td><td>Ping(ms):</td><td>Client ID:</td><td width='70%'></td></tr>"
+                let str ="<tr><td>Synced:</td><td>IP Address:</td><td>Ping(ms):</td><td>Client ID:</td></tr>"
                 users.forEach(user => {
-                    if(user.addr == "localhost") return;
-                    str = str.concat("<tr><td width: '10%'>" + user.addr + "</td><td width: '10%'>" + user.ping + "</td><td width: '10%'>" + user.id + "</td></tr>")
+                    let synced = "<td width='10%' style='color:yellow;'>?</td>"
+                    if (user.sync == true){
+                        synced = "<td width='10%' style='color:green;'>True</td>"
+                    } else if (user.sync == false){
+                        synced = "<td width='8%' style='color:tomato;'>False</td>"
+                    }
+                    str = str.concat("<tr>" + synced + "<td width='12%'>" + user.addr +"</td><td width='9%'>" + user.ping + "</td><td >" + user.id + "</td></tr>")
                 });
-                document.getElementById("data").innerHTML = str;
+                printData("data", str);
+                //socket.emit("syncingData", play, volume, timestamp)
+            })
+
+            socket.on('audio', (delay, play, volume, timestamp) => {
+                setTimeout(() => {
+
+                }, math.round(delay));
             })
 
         });
+
+        function printData(id, data){
+            document.getElementById(id).innerHTML = data;
+        }
     </script>
 </body>
 

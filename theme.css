@@ -1,16 +1,18 @@
-table {
-    background-color: black;
-    width: 100%;
-    border: 1px solid white;
-    padding-left: 10px;
-},
-
-td {
-    text-align: left;
-    width: 10%;
-},
+html {
+    background-color: #262626;
+}
 
 body {
     color: white;
+}
 
+table {
+    background-color: 0d0d0d;
+    width: 100%;
+    border: 1px solid white;
+    padding-left: 10px;
+}
+
+td {
+    text-align: left;
 }

@@ -1,0 +1,10 @@
+client  joins
+server  send handshake with address
+client  send handshake sucsess and displays/saves address
+server  setup user data
+
+
+
+
+
+delay = ping + hightest ping

@@ -1,11 +1,11 @@
 const colors = require('colors');
-
 const express = require('express')
 const app = express();
 const server = require('http').createServer(app)
 const io = require('socket.io').listen(server)
 
 let users = [];
+const debug = false;
 
 app.use(express.static(__dirname))
 
@@ -18,46 +18,49 @@ app.get('/', (req, res) => {
 })
 
 io.sockets.on('connection', socket => {
-
     let address = socket.handshake.address.replace("::ffff:", "").replace("::1", "localhost").replace("127.0.0.1", "localhost")
+    socket.emit("handshake", address);
 
-    socket.emit("link", address);
-
-    socket.on('disconnect', () => {
-        console.log("")
-        console.log(address.red + "\tlink lost".yellow)
-        for (i = 0; i < users.length; i++) {
-            if (users[i].addr === address) {
-                console.log(users.splice(i, 1)[0]);
-            }
-        }
-        console.log(users)
+    socket.on('handshake-success', () => {
+        pingTest(socket);
+        console.log(address.green + "\thandshake-success".yellow)
+        let obj = {};
+        obj.id = socket.id;
+        obj.addr = address;
+        obj.ping = 0;
+        obj.sync = false;
+        obj.audio = {};
+        obj.audio.play = false;
+        obj.audio.volume = 100;
+        obj.audio.timestamp = 000;
+        users.push(obj);
+        log(users)
         updateData(io)
     })
 
-    socket.on('fully linked', () => {
-        pingTest(socket);
-        console.log("")
-        console.log(address.green + "\tfully linked".yellow)
-        let obj = {}
-        obj.id = socket.id
-        obj.addr = address
-        obj.ping = 0
-        users.push(obj)
-        console.log(users)
-        updateData(io, users)
+    socket.on('pingRebound', time => {
+        let ping = (Date.now() - time)/2
+        modify(address).ping = ping;
+        updateData(io);
     })
 
-    socket.on('avrage ping', (avgPing) => {
-        if(modify(address)){
-        modify(address).ping = avgPing
-        }
+    socket.on('disconnect', () => {
+        console.log(address.red + "\tlink lost".yellow)
+        users.forEach((user, index) => {
+            if (address === user.addr) {
+                users.splice(index, 1);
+            }
+        })
+        log(modify(address))
+        updateData(io)
     })
 })
 
 function pingTest(socket) {
     setInterval(() => {
-        socket.emit("pingTime", Date.now())
+        if(users.length > 0) {
+            socket.emit("pingTest", Date.now())
+        }
     }, 100);
 }
 
@@ -71,11 +74,15 @@ function modify(address) {
 
 function updateData(io) {
     if (modify("localhost")) {
-        setInterval(() => {
-            if (!modify("localhost")) return;
             io.to(modify("localhost").id).emit('data', users)
-        }, 500)
-    } else {
-        console.log("not using local host")
+    }
+    users.forEach(user => {
+        io.to(user.id).emit('data',users)
+    })
+}
+
+function log(msg) {
+    if(debug){
+        console.log(msg)
     }
 }
