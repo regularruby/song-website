@@ -11,12 +11,13 @@
 </head>
 
 <body style="color:white">
-    <table class="console">
-        <rt>
-            <td id="ip" width="10%"></td>
+    <table width="100%">
+        <tr>
+            <td id="ip" width="12.8%"></td>
             <td id="ping" style="padding-left: 10px"></td>
-        </rt>
+        </tr>
     </table>
+    <table id="data" width="100%"></table>
     <audio controls preload="auto">
         <source src="song.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
@@ -53,6 +54,15 @@
 
                 document.getElementById("ping").innerHTML = "ping:\t" + pingAvg;
                 socket.emit("avrage ping", pingAvg);
+            })
+
+            socket.on('data', users => {
+                let str = "<tr><td>IP Address:</td><td>Ping(ms):</td><td>Client ID:</td><td width='70%'></td></tr>"
+                users.forEach(user => {
+                    if(user.addr == "localhost") return;
+                    str = str.concat("<tr><td width: '10%'>" + user.addr + "</td><td width: '10%'>" + user.ping + "</td><td width: '10%'>" + user.id + "</td></tr>")
+                });
+                document.getElementById("data").innerHTML = str;
             })
 
         });

@@ -24,29 +24,35 @@ io.sockets.on('connection', socket => {
     socket.emit("link", address);
 
     socket.on('disconnect', () => {
+        console.log("")
         console.log(address.red + "\tlink lost".yellow)
-        for(i=0;i<users.length;i++){
-            if(users[i].addr === address){
+        for (i = 0; i < users.length; i++) {
+            if (users[i].addr === address) {
                 console.log(users.splice(i, 1)[0]);
             }
         }
         console.log(users)
+        updateData(io)
     })
 
     socket.on('fully linked', () => {
         pingTest(socket);
+        console.log("")
         console.log(address.green + "\tfully linked".yellow)
         let obj = {}
+        obj.id = socket.id
         obj.addr = address
         obj.ping = 0
         users.push(obj)
         console.log(users)
+        updateData(io, users)
     })
 
     socket.on('avrage ping', (avgPing) => {
+        if(modify(address)){
         modify(address).ping = avgPing
+        }
     })
-
 })
 
 function pingTest(socket) {
@@ -55,10 +61,21 @@ function pingTest(socket) {
     }, 100);
 }
 
-function modify(address){
-    for(i=0;i<users.length;i++){
-        if(users[i].addr === address){
+function modify(address) {
+    for (i = 0; i < users.length; i++) {
+        if (users[i].addr === address) {
             return users[i];
         }
+    }
+}
+
+function updateData(io) {
+    if (modify("localhost")) {
+        setInterval(() => {
+            if (!modify("localhost")) return;
+            io.to(modify("localhost").id).emit('data', users)
+        }, 500)
+    } else {
+        console.log("not using local host")
     }
 }

@@ -1,8 +1,13 @@
-.console {
+table {
     background-color: black;
     width: 100%;
     border: 1px solid white;
     padding-left: 10px;
+},
+
+td {
+    text-align: left;
+    width: 10%;
 },
 
 body {
