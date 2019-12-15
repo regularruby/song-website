@@ -4,14 +4,15 @@ const app = express();
 const server = require('http').createServer(app)
 const io = require('socket.io').listen(server)
 
-let users = [];
 const debug = false;
+const share_data = true;
 
-app.use(express.static(__dirname))
+let users = [];
 
 server.listen(process.env.PORT || 81);
 console.log('server running...')
 
+app.use(express.static(__dirname))
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html')
     res.sendFile(__dirname + '/theme.css')
@@ -35,24 +36,26 @@ io.sockets.on('connection', socket => {
         obj.audio.timestamp = 000;
         users.push(obj);
         log(users)
-        updateData(io)
+        updateData(io, address)
     })
 
     socket.on('pingRebound', time => {
         let ping = (Date.now() - time)/2
-        modify(address).ping = ping;
-        updateData(io);
+        if(modify(address)){
+            modify(address).ping = ping;
+        }
+        updateData(io , address);
     })
 
     socket.on('disconnect', () => {
         console.log(address.red + "\tlink lost".yellow)
+        log(modify(address))
         users.forEach((user, index) => {
             if (address === user.addr) {
                 users.splice(index, 1);
             }
         })
-        log(modify(address))
-        updateData(io)
+        updateData(io, address)
     })
 })
 
@@ -72,12 +75,19 @@ function modify(address) {
     }
 }
 
-function updateData(io) {
+function updateData(io, client) {
     if (modify("localhost")) {
             io.to(modify("localhost").id).emit('data', users)
     }
     users.forEach(user => {
-        io.to(user.id).emit('data',users)
+        if(user.addr === "localhost") return;
+        if(share_data == true){
+            io.to(user.id).emit('data', users)
+        } else {
+            let send = [];
+            send.push(user)
+            io.to(user.id).emit('data', send)
+        }
     })
 }
 

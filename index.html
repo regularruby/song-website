@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
 
-    <title>music</title>
+    <title>music sync</title>
     <meta name="description" content="music">
     <meta name="author" content="SitePoint">
     <link rel="stylesheet" href="theme.css">
@@ -11,12 +11,6 @@
 </head>
 
 <body >
-    <table width="100%">
-        <tr>
-            <td id="ip" width="10%"></td>
-            <td id="ping" width="10%"></td>
-        </tr>
-    </table>
     <table id="data" width="100%"></table>
     <audio controls preload="auto">
         <source src="song.mp3" type="audio/mpeg">
@@ -24,7 +18,7 @@
     </audio>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
         $(function () {
             var socket = io();
@@ -41,15 +35,16 @@
             });
 
             socket.on('data', users => {
-                let str ="<tr><td>Synced:</td><td>IP Address:</td><td>Ping(ms):</td><td>Client ID:</td></tr>"
+                let str ="<tr><th width='90px'>Synced:</th><th width='135px'>IP Address:</th><th width='120px'>Ping(ms):</th><th width='210px'>Client ID:</th><th width='135px' class='split'>Time Stamp:</th><th width='100px'>Status:</th><th width='100px'>Volume:</th><th>Controles:</th></tr>"
+                if(!users)return;
                 users.forEach(user => {
-                    let synced = "<td width='10%' style='color:yellow;'>?</td>"
+                    let synced = "<td id='unknown'>?</td>"
                     if (user.sync == true){
-                        synced = "<td width='10%' style='color:green;'>True</td>"
+                        synced = "<td id='true'>True</td>"
                     } else if (user.sync == false){
-                        synced = "<td width='8%' style='color:tomato;'>False</td>"
+                        synced = "<td id='false'>False</td>"
                     }
-                    str = str.concat("<tr>" + synced + "<td width='12%'>" + user.addr +"</td><td width='9%'>" + user.ping + "</td><td >" + user.id + "</td></tr>")
+                    str = str.concat("<tr>" + synced + "<td>" + user.addr +"</td><td>" + user.ping + "</td><td>" + user.id + "</td><td class='split'>" + user.audio.timestamp + "</td><td>" + user.audio.play + "</td><td>" + user.audio.volume + "</td><td><button class='button' id='play'>Play</button></td></tr>")
                 });
                 printData("data", str);
                 //socket.emit("syncingData", play, volume, timestamp)

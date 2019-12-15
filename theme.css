@@ -4,10 +4,11 @@ html {
 
 body {
     color: white;
+    font-family: monospace;
 }
 
 table {
-    background-color: 0d0d0d;
+    background-color: #0d0d0d;
     width: 100%;
     border: 1px solid white;
     padding-left: 10px;
@@ -15,4 +16,41 @@ table {
 
 td {
     text-align: left;
+}
+
+th {
+    text-align: left;
+}
+
+#unknown {
+    color: yellow;
+}
+
+#true {
+    color: #00b300;
+}
+
+#false {
+    color: tomato;
+}
+
+.split {
+    border-left: 1px solid white;
+    padding-left: 20px;
+}
+
+.button {
+    background-color: lime;
+    color: black;
+    border: none;
+    text-align: center;
+    cursor: pointer;
+    padding: 2px 20px;
+    border-radius: 10px;
+    opacity: 50%;
+}
+
+.button:hover {
+    opacity: 90%;
+    border-radius: 5px;
 }
